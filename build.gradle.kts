@@ -1,5 +1,6 @@
 plugins {
     id("java")
+    war
 }
 
 group = "ru.clevertec.task"
@@ -12,6 +13,10 @@ repositories {
 dependencies {
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
+    implementation("org.postgresql:postgresql:42.7.2")
+    compileOnly("org.projectlombok:lombok:1.18.30")
+    compileOnly("javax.servlet:javax.servlet-api:4.0.1")
+    compileOnly("javax:javaee-web-api:8.0.1")
 }
 
 tasks.test {
