@@ -29,8 +29,11 @@ public class CreateAccountController extends HttpServlet {
         UUID bankId = UUID.fromString(req.getParameter("bankId"));
         String currency = req.getParameter("currency");
 
-        accountService.createAccount(bankId, userId, currency);
-        req.getRequestDispatcher("/WEB-INF/views/other/menu.jsp").forward(req, resp);
+        if (accountService.createAccount(bankId, userId, currency)) {
+            req.getRequestDispatcher("/WEB-INF/views/other/menu.jsp").forward(req, resp);
+        } else {
+            req.getRequestDispatcher("/WEB-INF/views/errors/error-occurred.jsp").forward(req, resp);
+        }
     }
 
     @Override

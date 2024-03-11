@@ -22,12 +22,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UUID createUser(String login, String password, String phoneNumber, String firstname, String surname) throws SQLException {
+    public UUID createUser(String login, String password, String phoneNumber, String firstname, String surname) {
         return userRepository.createUser(login, password, phoneNumber, firstname, surname);
     }
 
     @Override
-    public UUID getUser(String login, String password) throws SQLException {
+    public UUID getUser(String login, String password) {
         return userRepository.getUser(login, password);
     }
 }

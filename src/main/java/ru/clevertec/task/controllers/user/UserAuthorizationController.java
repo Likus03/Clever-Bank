@@ -31,20 +31,17 @@ public class UserAuthorizationController extends HttpServlet {
     }
 
     private void validateUser(HttpServletRequest req, HttpServletResponse resp, String login, String password) throws ServletException, IOException {
-        try {
-            UUID userId = userService.getUser(login, password);
+        UUID userId = userService.getUser(login, password);
 
-            if (userId != null) {
-                HttpSession session = req.getSession();
-                session.setAttribute("userId", userId);
+        if (userId != null) {
+            HttpSession session = req.getSession();
+            session.setAttribute("userId", userId);
 
-                goToCreateAccountPage(req, resp);
-            } else {
-                goToErrorPage(req, resp);
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+            goToCreateAccountPage(req, resp);
+        } else {
+            goToErrorPage(req, resp);
         }
+
     }
 
     private static void goToErrorPage(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

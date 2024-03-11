@@ -1,6 +1,5 @@
 package ru.clevertec.task.controllers.user;
 
-import ru.clevertec.task.repositories.user.UserRepository;
 import ru.clevertec.task.services.user.UserService;
 import ru.clevertec.task.services.user.UserServiceImpl;
 
@@ -11,7 +10,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.UUID;
 
 @WebServlet(urlPatterns = "/user/registration")
@@ -31,19 +29,16 @@ public class UserRegistrationController extends HttpServlet {
         String firstname = req.getParameter("firstname");
         String surname = req.getParameter("surname");
 
-        try {
-            UUID userId = userService.createUser(login, password, phoneNumber, firstname, surname);
+        UUID userId = userService.createUser(login, password, phoneNumber, firstname, surname);
 
-            if (userId != null) {
-                HttpSession session = req.getSession();
-                session.setAttribute("userId", userId);
+        if (userId != null) {
+            HttpSession session = req.getSession();
+            session.setAttribute("userId", userId);
 
-                req.getRequestDispatcher("/WEB-INF/views/createAccount.jsp").forward(req, resp);
-            } else {
-                req.getRequestDispatcher("/WEB-INF/views/errors/registration-failed.jsp").forward(req, resp);
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+            req.getRequestDispatcher("/WEB-INF/views/createAccount.jsp").forward(req, resp);
+        } else {
+            req.getRequestDispatcher("/WEB-INF/views/errors/registration-failed.jsp").forward(req, resp);
         }
+
     }
 }
