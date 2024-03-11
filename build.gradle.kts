@@ -19,6 +19,8 @@ dependencies {
     compileOnly("javax.servlet:javax.servlet-api:4.0.1")
     compileOnly("javax:javaee-web-api:8.0.1")
     implementation("javax.servlet:jstl:1.2")
+    implementation("com.google.code.gson:gson:2.3.1")
+
 }
 
 tasks.test {

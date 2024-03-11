@@ -6,5 +6,5 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 public interface TransactionRepository {
-    void refillTransaction(BigDecimal amount, String transactionType, String iban, LocalDate date, LocalTime time) throws SQLException;
+    void refillTransaction(BigDecimal amount, String transactionType, String iban, LocalDate date, LocalTime time, String currency) throws SQLException;
 }

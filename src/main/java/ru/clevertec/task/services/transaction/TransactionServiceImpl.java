@@ -24,11 +24,10 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public boolean refillTransaction(String iban, BigDecimal amount) {
+    public boolean refillTransaction(String iban, BigDecimal amount, String currency) {
         try {
-            transactionRepository.refillTransaction(amount, TransactionType.REFILL.toString(), iban, LocalDate.now(), LocalTime.now());
-        }
-        catch (SQLException e){
+            transactionRepository.refillTransaction(amount, TransactionType.REFILL.toString(), iban, LocalDate.now(), LocalTime.now(), currency);
+        } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }

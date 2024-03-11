@@ -1,4 +1,4 @@
-package ru.clevertec.task.constants;
+package ru.clevertec.task.utils;
 
 public class Constants {
     public static final String CONFIG = "config.properties";
