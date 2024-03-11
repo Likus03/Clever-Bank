@@ -13,7 +13,7 @@ public class DbConnection {
     }
 
     public static Connection getConnection() {
-        getDriver();
+        loadingDriver();
 
         try {
             Properties properties = new Properties();
@@ -31,11 +31,11 @@ public class DbConnection {
         }
     }
 
-    private static void getDriver() {
+    private static void loadingDriver() {
         try {
             Class.forName(DRIVER);
         } catch (ClassNotFoundException e) {
-            System.err.println("JDBC Driver not found.");
+            System.err.println("-------JDBC Driver not found.-------");
             e.printStackTrace();
         }
     }
