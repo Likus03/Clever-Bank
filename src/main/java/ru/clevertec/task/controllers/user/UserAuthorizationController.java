@@ -52,6 +52,6 @@ public class UserAuthorizationController extends HttpServlet {
     }
 
     private static void goToCreateAccountPage(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        req.getRequestDispatcher("/WEB-INF/views/createAccount.jsp").forward(req, resp);
+        req.getRequestDispatcher("/WEB-INF/views/other/menu.jsp").forward(req, resp);
     }
 }

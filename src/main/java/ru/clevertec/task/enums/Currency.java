@@ -1,7 +1,14 @@
 package ru.clevertec.task.enums;
 
+import java.util.List;
+
 public enum Currency {
     EUR,
     USD,
-    BYN
+    BYN;
+    private static final List<Currency> currencies = List.of(Currency.values());
+
+    public static List<Currency> getCurrencyList() {
+        return List.copyOf(currencies);
+    }
 }
