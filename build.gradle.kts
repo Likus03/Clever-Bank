@@ -17,6 +17,7 @@ dependencies {
     compileOnly("org.projectlombok:lombok:1.18.30")
     compileOnly("javax.servlet:javax.servlet-api:4.0.1")
     compileOnly("javax:javaee-web-api:8.0.1")
+    implementation("javax.servlet:jstl:1.2")
 }
 
 tasks.test {
