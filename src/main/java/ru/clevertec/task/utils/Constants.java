@@ -36,5 +36,7 @@ public class Constants {
     public static final String PHONENUMBER = "phoneNumber";
     public static final String FIRSTNAME = "firstname";
     public static final String SURNAME = "surname";
+    public static final String NAME = "name";
+    public static final String ID = "id";
 
 }

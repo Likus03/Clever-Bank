@@ -33,7 +33,7 @@ public class AccountServiceImpl implements AccountService {
         return true;
     }
 
-    private String generateIban(){
+    private static String generateIban(){
         return UUID.randomUUID().toString().replace("-", " ");
     }
 }

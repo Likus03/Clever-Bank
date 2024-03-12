@@ -15,7 +15,7 @@
     </label>
     <input type="submit" value="authorization">
 </form>
-<form action="/converter" method="get">
+<form action="/user/registration" method="get">
     <input type="submit" value="Go to registration">
 </form>
 </body>

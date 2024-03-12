@@ -1,5 +1,6 @@
 package ru.clevertec.task.repositories.user;
 
+import ru.clevertec.task.aspects.Log;
 import ru.clevertec.task.db.DbConnection;
 
 import java.sql.*;
@@ -18,6 +19,7 @@ public class UserRepositoryImpl implements UserRepository {
         return userRepository;
     }
 
+    @Log
     @Override
     public UUID createUser(String login, String password, String phoneNumber, String firstname, String surname) {
         try (Connection connection = DbConnection.getConnection()) {
@@ -53,7 +55,7 @@ public class UserRepositoryImpl implements UserRepository {
         return null;
     }
 
-
+    @Log
     @Override
     public UUID getUser(String login, String password) {
         try (Connection connection = DbConnection.getConnection()) {
