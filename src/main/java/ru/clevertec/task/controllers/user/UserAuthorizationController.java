@@ -1,5 +1,6 @@
 package ru.clevertec.task.controllers.user;
 
+import ru.clevertec.task.aspects.Log;
 import ru.clevertec.task.services.user.UserService;
 import ru.clevertec.task.services.user.UserServiceImpl;
 
@@ -10,7 +11,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.UUID;
 
 @WebServlet(urlPatterns = "/user/authorization")
@@ -21,7 +21,7 @@ public class UserAuthorizationController extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         req.getRequestDispatcher("/index.jsp").forward(req, resp);
     }
-
+    @Log
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String login = req.getParameter("login");
