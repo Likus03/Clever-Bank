@@ -2,6 +2,7 @@ package ru.clevertec.task.entities;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import ru.clevertec.task.enums.Currency;
 import ru.clevertec.task.enums.TransactionType;
 
 import java.math.BigDecimal;
@@ -19,4 +20,5 @@ public class Transaction {
     private String recipientAccount;
     private LocalDate date;
     private LocalTime time;
+    private Currency currency;
 }

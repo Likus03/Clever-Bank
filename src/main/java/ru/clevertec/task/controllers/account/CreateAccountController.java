@@ -17,20 +17,24 @@ import java.util.List;
 import java.util.UUID;
 
 import static ru.clevertec.task.enums.Currency.*;
+import static ru.clevertec.task.utils.Constants.*;
 
-@WebServlet(urlPatterns = "/account/create")
+@WebServlet(ACCOUNT_CREATE_URL)
 public class CreateAccountController extends HttpServlet {
     private final BankService bankService = BankServiceImpl.getInstance();
     private final AccountService accountService = AccountServiceImpl.getInstance();
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        UUID userId = (UUID) req.getSession().getAttribute("userId");
-        UUID bankId = UUID.fromString(req.getParameter("bankId"));
-        String currency = req.getParameter("currency");
+        UUID userId = (UUID) req.getSession().getAttribute(USER_ID);
+        UUID bankId = UUID.fromString(req.getParameter(BANK_ID));
+        String currency = req.getParameter(CURRENCY);
 
-        accountService.createAccount(bankId, userId, currency);
-        req.getRequestDispatcher("/WEB-INF/views/other/menu.jsp").forward(req, resp);
+        if (accountService.createAccount(bankId, userId, currency)) {
+            req.getRequestDispatcher(MENU).forward(req, resp);
+        } else {
+            req.getRequestDispatcher(ERROR_OCCURRED_PAGE).forward(req, resp);
+        }
     }
 
     @Override
@@ -38,8 +42,8 @@ public class CreateAccountController extends HttpServlet {
         List<Bank> banks = bankService.getBanks();
         List<Currency> currencies = getCurrencyList();
 
-        req.setAttribute("banks", banks);
-        req.setAttribute("currencies", currencies);
-        req.getRequestDispatcher("/WEB-INF/views/account/createAccount.jsp").forward(req, resp);
+        req.setAttribute(BANKS, banks);
+        req.setAttribute(CURRENCIES, currencies);
+        req.getRequestDispatcher(ACCOUNT_CREATE_PAGE).forward(req, resp);
     }
 }

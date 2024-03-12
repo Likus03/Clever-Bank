@@ -1,5 +1,6 @@
 package ru.clevertec.task.repositories.user;
 
+import ru.clevertec.task.aspects.Log;
 import ru.clevertec.task.db.DbConnection;
 
 import java.sql.*;
@@ -18,6 +19,7 @@ public class UserRepositoryImpl implements UserRepository {
         return userRepository;
     }
 
+    @Log
     @Override
     public UUID createUser(String login, String password, String phoneNumber, String firstname, String surname) {
         try (Connection connection = DbConnection.getConnection()) {
@@ -34,31 +36,32 @@ public class UserRepositoryImpl implements UserRepository {
 
                 try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
-                        return (UUID) generatedKeys.getObject(1);
+                        UUID userId = (UUID) generatedKeys.getObject(1);
+                        connection.commit();
+                        return userId;
                     }
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    connection.rollback();
+                    else {
+                        connection.rollback();
+                        throw new SQLException("The transaction was rolled back");
+                    }
                 }
-            } finally {
-                try {
-                    connection.commit();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
+
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
         return null;
     }
 
+    @Log
     @Override
     public UUID getUser(String login, String password) {
         try (Connection connection = DbConnection.getConnection()) {
             connection.setReadOnly(true);
 
-            String query = "SELECT * FROM users WHERE login = ? and password = ?";
+            String query = "SELECT id FROM users WHERE login = ? and password = ?";
 
             try (PreparedStatement statement = connection.prepareStatement(query)) {
                 statement.setString(1, login);
@@ -71,7 +74,7 @@ public class UserRepositoryImpl implements UserRepository {
                 }
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
         return null;
     }

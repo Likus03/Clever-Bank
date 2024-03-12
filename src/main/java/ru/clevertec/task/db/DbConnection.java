@@ -7,7 +7,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
-import static ru.clevertec.task.constants.Constants.*;
+import static ru.clevertec.task.utils.Constants.*;
 public class DbConnection {
     private DbConnection() {
     }

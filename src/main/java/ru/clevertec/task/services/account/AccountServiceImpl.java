@@ -3,6 +3,7 @@ package ru.clevertec.task.services.account;
 import ru.clevertec.task.repositories.account.AccountRepository;
 import ru.clevertec.task.repositories.account.AccountRepositoryImpl;
 
+import java.sql.SQLException;
 import java.util.UUID;
 
 public class AccountServiceImpl implements AccountService {
@@ -20,12 +21,19 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public void createAccount(UUID bankId, UUID userId, String currency) {
+    public boolean createAccount(UUID bankId, UUID userId, String currency) {
         String iban = generateIban();
-        accountRepository.createAccount(iban, bankId, userId, currency);
+        try {
+            accountRepository.createAccount(iban, bankId, userId, currency);
+        }
+        catch (SQLException e){
+            e.printStackTrace();
+            return false;
+        }
+        return true;
     }
 
-    private String generateIban(){
+    private static String generateIban(){
         return UUID.randomUUID().toString().replace("-", " ");
     }
 }
