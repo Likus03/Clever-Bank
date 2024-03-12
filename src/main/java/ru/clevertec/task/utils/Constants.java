@@ -19,10 +19,11 @@ public class Constants {
     public static final String REGISTRATION_URL = "/user/registration";
     public static final String REGISTRATION_PAGE = "/WEB-INF/views/user/registration.jsp";
     public static final String REGISTRATION_FAILED_PAGE = "/WEB-INF/views/errors/registration-failed.jsp";
-    public static final String API_KEY = "bdd1af0bd03086e428c68bfb";  //will change
     public static final String JSON_OBJECT_NAME = "conversion_rates";
     public static final String ACCOUNT_WITHDRAWALS_URL = "/transaction/withdrawals";
     public static final String ACCOUNT_WITHDRAWALS_PAGE = "/WEB-INF/views/transaction/withdrawals.jsp";
+    public static final String TRANSFER_URL = "/transaction/transfer";
+    public static final String TRANSFER_PAGE = "/WEB-INF/views/transaction/transfer.jsp";
 
     public static final String USER_ID = "userId";
     public static final String BANK_ID = "bankId";
@@ -30,6 +31,8 @@ public class Constants {
     public static final String CURRENCIES = "currencies";
     public static final String BANKS = "banks";
     public static final String IBAN = "iban";
+    public static final String SENDER_IBAN = "senderIban";
+    public static final String RECIPIENT_IBAN = "recipientIban";
     public static final String AMOUNT = "amount";
     public static final String LOGIN = "login";
     public static final String PASSWORD = "password";
@@ -39,4 +42,6 @@ public class Constants {
     public static final String NAME = "name";
     public static final String ID = "id";
 
+
+    public static final String API_KEY = "bdd1af0bd03086e428c68bfb";  //will change
 }

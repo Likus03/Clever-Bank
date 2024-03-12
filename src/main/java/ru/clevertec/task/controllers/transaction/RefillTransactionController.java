@@ -31,7 +31,7 @@ public class RefillTransactionController extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String iban = req.getParameter(IBAN);
         Currency currency = Currency.valueOf(req.getParameter(CURRENCY));
-        BigDecimal amount = BigDecimal.valueOf(Long.parseLong(req.getParameter(AMOUNT)));
+        BigDecimal amount = BigDecimal.valueOf(Double.parseDouble(req.getParameter(AMOUNT)));
 
         if (transactionService.refillTransaction(iban, amount, currency)) {
             req.getRequestDispatcher(MENU).forward(req, resp);

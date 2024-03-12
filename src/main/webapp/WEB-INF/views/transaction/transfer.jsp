@@ -2,11 +2,11 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <html>
 <head>
-    <title>Refill</title>
+    <title>Transfer</title>
 </head>
 <body>
-<form action="/transaction/refill" method="post">
-    <input type="text" name="iban" placeholder="Enter account number" required>
+<form action="/transaction/transfer" method="post">
+    <input type="text" name="senderIban" placeholder="Enter your account number" required>
     <input type="number" step="0.01" name="amount" placeholder="Enter amount" required>
 
     <label>Currency:</label>
@@ -17,7 +17,9 @@
             </option>
         </c:forEach>
     </select>
-    <input type="submit" value="refill">
+
+    <input type="text" name="recipientIban" placeholder="Enter the recipient's account number" required>
+    <input type="submit" value="withdrawals">
 </form>
 </body>
 </html>

@@ -6,8 +6,8 @@
 </head>
 <body>
 <form action="/transaction/withdrawals" method="post">
-    <input type="text" name="iban" placeholder="Enter account number">
-    <input type="text" name="amount" placeholder="Enter amount">
+    <input type="text" name="iban" placeholder="Enter account number" required>
+    <input type="number" step="0.01" name="amount" placeholder="Enter amount" required>
 
     <label>Currency:</label>
     <select name="currency">

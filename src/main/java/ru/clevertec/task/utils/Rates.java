@@ -17,6 +17,13 @@ import static ru.clevertec.task.utils.Constants.JSON_OBJECT_NAME;
 
 public class Rates {
     public static BigDecimal getExchangeRates(Currency fromCurrency, Currency toCurrency) throws IOException {
+        StringBuilder content = getStringBuilder(fromCurrency);
+        JsonObject jsonObject = JsonParser.parseString(content.toString()).getAsJsonObject();
+
+        return jsonObject.getAsJsonObject(JSON_OBJECT_NAME).get(String.valueOf(toCurrency)).getAsBigDecimal();
+    }
+
+    private static StringBuilder getStringBuilder(Currency fromCurrency) throws IOException {
         URL url = getUrl(fromCurrency);
 
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -27,10 +34,7 @@ public class Rates {
 
         reader.close();
         connection.disconnect();
-
-        JsonObject jsonObject = JsonParser.parseString(content.toString()).getAsJsonObject();
-
-        return jsonObject.getAsJsonObject(JSON_OBJECT_NAME).get(String.valueOf(toCurrency)).getAsBigDecimal();
+        return content;
     }
 
     private static StringBuilder getContent(BufferedReader reader) throws IOException {

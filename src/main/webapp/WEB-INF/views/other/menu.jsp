@@ -16,5 +16,9 @@
     <label>Withdrawals: </label>
     <input type="submit" value="withdrawals">
 </form>
+<form action="/transaction/transfer" method="get">
+    <label>Transfer: </label>
+    <input type="submit" value="transfer">
+</form>
 </body>
 </html>

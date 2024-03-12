@@ -7,5 +7,7 @@ import java.math.BigDecimal;
 public interface TransactionService {
     boolean refillTransaction(String iban, BigDecimal amount, Currency currency);
 
-    boolean withdrawalTransaction(String iban, BigDecimal amount, Currency currency);
+    boolean withdrawalsTransaction(String iban, BigDecimal amount, Currency currency);
+
+    boolean transferTransaction(String senderIban, BigDecimal amount, Currency currency, String recipientIban);
 }

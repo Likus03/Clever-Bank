@@ -11,6 +11,7 @@ import java.time.LocalTime;
 public interface TransactionRepository {
     void refillTransaction(BigDecimal amount, TransactionType transactionType, String iban, LocalDate date, LocalTime time, Currency currency) throws SQLException;
 
-    void withdrawalTransaction(BigDecimal amount, TransactionType transactionType, String iban, LocalDate now, LocalTime now1, Currency currency) throws SQLException;
+    void withdrawalsTransaction(BigDecimal amount, TransactionType transactionType, String iban, LocalDate date, LocalTime time, Currency currency) throws SQLException;
 
+    void transferTransaction(BigDecimal amount, TransactionType transactionType, String senderIban, String recipientIban, LocalDate date, LocalTime time, Currency currency) throws SQLException;
 }
