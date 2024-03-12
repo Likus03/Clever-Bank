@@ -13,19 +13,21 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.UUID;
 
-@WebServlet(urlPatterns = "/user/authorization")
+import static ru.clevertec.task.utils.Constants.*;
+
+@WebServlet(AUTHORIZATION_URL)
 public class UserAuthorizationController extends HttpServlet {
     private final UserService userService = UserServiceImpl.getInstance();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        req.getRequestDispatcher("/index.jsp").forward(req, resp);
+        req.getRequestDispatcher(START_PAGE).forward(req, resp);
     }
     @Log
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String login = req.getParameter("login");
-        String password = req.getParameter("password");
+        String login = req.getParameter(LOGIN);
+        String password = req.getParameter(PASSWORD);
 
         validateUser(req, resp, login, password);
     }
@@ -35,7 +37,7 @@ public class UserAuthorizationController extends HttpServlet {
 
         if (userId != null) {
             HttpSession session = req.getSession();
-            session.setAttribute("userId", userId);
+            session.setAttribute(USER_ID, userId);
 
             goToCreateAccountPage(req, resp);
         } else {
@@ -45,10 +47,10 @@ public class UserAuthorizationController extends HttpServlet {
     }
 
     private static void goToErrorPage(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        req.getRequestDispatcher("/WEB-INF/views/errors/login-failed.jsp").forward(req, resp);
+        req.getRequestDispatcher(LOGIN_FAILED_PAGE).forward(req, resp);
     }
 
     private static void goToCreateAccountPage(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        req.getRequestDispatcher("/WEB-INF/views/other/menu.jsp").forward(req, resp);
+        req.getRequestDispatcher(MENU).forward(req, resp);
     }
 }

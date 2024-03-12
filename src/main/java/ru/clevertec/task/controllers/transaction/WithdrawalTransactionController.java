@@ -9,6 +9,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
@@ -16,15 +17,15 @@ import java.util.List;
 import static ru.clevertec.task.enums.Currency.getCurrencyList;
 import static ru.clevertec.task.utils.Constants.*;
 
-@WebServlet(ACCOUNT_REFILL_URL)
-public class RefillTransactionController extends HttpServlet {
+@WebServlet(ACCOUNT_WITHDRAWALS_URL)
+public class WithdrawalTransactionController extends HttpServlet {
     private final TransactionService transactionService = TransactionServiceImpl.getInstance();
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         List<Currency> currencies = getCurrencyList();
         req.setAttribute(CURRENCIES, currencies);
 
-        req.getRequestDispatcher(ACCOUNT_REFILL_PAGE).forward(req, resp);
+        req.getRequestDispatcher(ACCOUNT_WITHDRAWALS_PAGE).forward(req, resp);
     }
 
     @Override
@@ -33,11 +34,9 @@ public class RefillTransactionController extends HttpServlet {
         Currency currency = Currency.valueOf(req.getParameter(CURRENCY));
         BigDecimal amount = BigDecimal.valueOf(Long.parseLong(req.getParameter(AMOUNT)));
 
-        if (transactionService.refillTransaction(iban, amount, currency)) {
+        if (transactionService.withdrawalTransaction(iban, amount, currency)) {
             req.getRequestDispatcher(MENU).forward(req, resp);
         }
         req.getRequestDispatcher(ERROR_OCCURRED_PAGE).forward(req, resp);
     }
-
-
 }

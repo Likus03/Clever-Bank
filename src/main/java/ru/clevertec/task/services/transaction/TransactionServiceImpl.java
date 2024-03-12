@@ -1,5 +1,6 @@
 package ru.clevertec.task.services.transaction;
 
+import ru.clevertec.task.enums.Currency;
 import ru.clevertec.task.enums.TransactionType;
 import ru.clevertec.task.repositories.transaction.TransactionRepository;
 import ru.clevertec.task.repositories.transaction.TransactionRepositoryImpl;
@@ -24,9 +25,20 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public boolean refillTransaction(String iban, BigDecimal amount, String currency) {
+    public boolean refillTransaction(String iban, BigDecimal amount, Currency currency) {
         try {
-            transactionRepository.refillTransaction(amount, TransactionType.REFILL.toString(), iban, LocalDate.now(), LocalTime.now(), currency);
+            transactionRepository.refillTransaction(amount, TransactionType.REFILL, iban, LocalDate.now(), LocalTime.now(), currency);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean withdrawalTransaction(String iban, BigDecimal amount, Currency currency) {
+        try {
+            transactionRepository.withdrawalTransaction(amount, TransactionType.WITHDRAWALS, iban, LocalDate.now(), LocalTime.now(), currency);
         } catch (SQLException e) {
             e.printStackTrace();
             return false;

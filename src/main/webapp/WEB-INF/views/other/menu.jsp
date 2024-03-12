@@ -12,5 +12,9 @@
     <label>Refill account: </label>
     <input type="submit" value="refill">
 </form>
+<form action="/transaction/withdrawals" method="get">
+    <label>Withdrawals: </label>
+    <input type="submit" value="withdrawals">
+</form>
 </body>
 </html>

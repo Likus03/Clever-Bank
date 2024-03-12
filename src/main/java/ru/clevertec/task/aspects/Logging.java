@@ -1,9 +1,9 @@
 package ru.clevertec.task.aspects;
 
 import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Before;
-import org.aspectj.lang.annotation.Pointcut;
+import org.aspectj.lang.annotation.*;
+
+import java.util.Arrays;
 
 @Aspect
 public class Logging {
@@ -11,9 +11,8 @@ public class Logging {
     public void execute() {
     }
 
-    @Before("execute()")
-    public void executeBefore(JoinPoint joinPoint) {
-        System.out.println("Signature: " + joinPoint.getSignature());
-        System.out.println("Entered " + Thread.currentThread().getStackTrace()[2].getMethodName());
+    @AfterReturning(value = "execute()", returning = "results")
+    public void executeAfter(JoinPoint joinPoint, Object results) {
+        System.out.println(joinPoint.getSignature().getName() + "-> " + joinPoint.getSignature().toShortString() + ": " + Arrays.toString(joinPoint.getArgs()) + "-> " + results);
     }
 }
