@@ -1,5 +1,6 @@
 package ru.clevertec.task.services.account;
 
+import ru.clevertec.task.aspects.Log;
 import ru.clevertec.task.repositories.account.AccountRepository;
 import ru.clevertec.task.repositories.account.AccountRepositoryImpl;
 
@@ -20,11 +21,11 @@ public class AccountServiceImpl implements AccountService {
         return accountService;
     }
 
+    @Log
     @Override
     public boolean createAccount(UUID bankId, UUID userId, String currency) {
-        String iban = generateIban();
         try {
-            accountRepository.createAccount(iban, bankId, userId, currency);
+            accountRepository.createAccount(generateIban(), bankId, userId, currency);
         }
         catch (SQLException e){
             e.printStackTrace();

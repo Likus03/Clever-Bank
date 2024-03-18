@@ -1,9 +1,11 @@
 package ru.clevertec.task.repositories.account;
 
-import ru.clevertec.task.aspects.Log;
 import ru.clevertec.task.db.DbConnection;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -20,7 +22,6 @@ public class AccountRepositoryImpl implements AccountRepository {
         return accountRepository;
     }
 
-    @Log
     @Override
     public void createAccount(String iban, UUID bankId, UUID userId, String currency) throws SQLException {
         try (Connection connection = DbConnection.getConnection()) {

@@ -19,7 +19,6 @@ public class UserRepositoryImpl implements UserRepository {
         return userRepository;
     }
 
-    @Log
     @Override
     public UUID createUser(String login, String password, String phoneNumber, String firstname, String surname) {
         try (Connection connection = DbConnection.getConnection()) {
@@ -55,7 +54,6 @@ public class UserRepositoryImpl implements UserRepository {
         return null;
     }
 
-    @Log
     @Override
     public UUID getUser(String login, String password) {
         try (Connection connection = DbConnection.getConnection()) {

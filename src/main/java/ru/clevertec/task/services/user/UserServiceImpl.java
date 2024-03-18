@@ -1,6 +1,7 @@
 package ru.clevertec.task.services.user;
 
 import lombok.SneakyThrows;
+import ru.clevertec.task.aspects.Log;
 import ru.clevertec.task.repositories.user.UserRepository;
 import ru.clevertec.task.repositories.user.UserRepositoryImpl;
 
@@ -20,12 +21,12 @@ public class UserServiceImpl implements UserService {
         }
         return userService;
     }
-
+    @Log
     @Override
     public UUID createUser(String login, String password, String phoneNumber, String firstname, String surname) {
         return userRepository.createUser(login, password, phoneNumber, firstname, surname);
     }
-
+    @Log
     @Override
     public UUID getUser(String login, String password) {
         return userRepository.getUser(login, password);

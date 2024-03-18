@@ -1,5 +1,6 @@
 package ru.clevertec.task.services.bank;
 
+import ru.clevertec.task.aspects.Log;
 import ru.clevertec.task.entities.Bank;
 import ru.clevertec.task.repositories.bank.BankRepository;
 import ru.clevertec.task.repositories.bank.BankRepositoryImpl;
@@ -17,6 +18,7 @@ public class BankServiceImpl implements BankService{
         return bankService;
     }
 
+    @Log
     @Override
     public List<Bank> getBanks() {
         return bankRepository.getBanks();

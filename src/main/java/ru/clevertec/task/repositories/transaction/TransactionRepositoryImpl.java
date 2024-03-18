@@ -1,10 +1,8 @@
 package ru.clevertec.task.repositories.transaction;
 
-import ru.clevertec.task.aspects.Log;
 import ru.clevertec.task.db.DbConnection;
 import ru.clevertec.task.enums.Currency;
 import ru.clevertec.task.enums.TransactionType;
-import ru.clevertec.task.utils.Rates;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -13,9 +11,9 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 import static java.math.RoundingMode.HALF_EVEN;
-import static java.sql.Connection.*;
+import static java.sql.Connection.TRANSACTION_REPEATABLE_READ;
 import static java.sql.Types.OTHER;
-import static ru.clevertec.task.utils.Rates.*;
+import static ru.clevertec.task.utils.Rates.getExchangeRates;
 
 public class TransactionRepositoryImpl implements TransactionRepository {
     private static TransactionRepository transactionRepository;
@@ -30,7 +28,6 @@ public class TransactionRepositoryImpl implements TransactionRepository {
         return transactionRepository;
     }
 
-    @Log
     @Override
     public void refillTransaction(BigDecimal amount, TransactionType transactionType, String iban, LocalDate date, LocalTime time, Currency currency) throws SQLException {
         try (Connection connection = DbConnection.getConnection()) {
@@ -52,7 +49,6 @@ public class TransactionRepositoryImpl implements TransactionRepository {
         }
     }
 
-    @Log
     @Override
     public void withdrawalsTransaction(BigDecimal amount, TransactionType transactionType, String iban, LocalDate date, LocalTime time, Currency currency) throws SQLException {
         try (Connection connection = DbConnection.getConnection()) {
@@ -98,12 +94,10 @@ public class TransactionRepositoryImpl implements TransactionRepository {
         }
     }
 
-    @Log
     private static BigDecimal getAmount(BigDecimal amount, BigDecimal rate) {
         return amount.multiply(rate).setScale(2, HALF_EVEN);
     }
 
-    @Log
     private Currency getCurrency(String iban, Connection connection) throws SQLException {
         String selectQuery = "SELECT currency FROM account WHERE iban=?";
 
@@ -119,28 +113,24 @@ public class TransactionRepositoryImpl implements TransactionRepository {
         return null;
     }
 
-    @Log
     private static void insertRefillTransactionQuery(BigDecimal amount, TransactionType transactionType, String iban, LocalDate date, LocalTime time, Currency currency, Connection connection) throws SQLException {
         String insertQuery = "INSERT INTO transaction(amount, transaction_type, recipient_account_iban, date, time, currency) VALUES (?,?,?,?,?,?)";
 
         insertTransactionRecord(amount, transactionType, iban, date, time, currency, connection, insertQuery);
     }
 
-    @Log
     private static void insertWithdrawalsTransactionQuery(BigDecimal amount, TransactionType transactionType, String iban, LocalDate date, LocalTime time, Currency currency, Connection connection) throws SQLException {
         String insertQuery = "INSERT INTO transaction(amount, transaction_type, sender_account_iban, date, time, currency) VALUES (?,?,?,?,?,?)";
 
         insertTransactionRecord(amount, transactionType, iban, date, time, currency, connection, insertQuery);
     }
 
-    @Log
     private static void insertTransferTransactionQuery(BigDecimal amount, TransactionType transactionType, String senderIban, String recipientIban, LocalDate date, LocalTime time, Currency currency, Connection connection) throws SQLException {
         String insertQuery = "INSERT INTO transaction(amount, transaction_type, sender_account_iban, recipient_account_iban, date, time, currency) VALUES (?,?,?,?,?,?,?)";
 
         insertTransactionRecord(amount, transactionType, senderIban, recipientIban, date, time, currency, connection, insertQuery);
     }
 
-    @Log
     private static void insertTransactionRecord(BigDecimal amount, TransactionType transactionType, String iban, LocalDate date, LocalTime time, Currency currency, Connection connection, String insertQuery) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement(insertQuery)) {
             statement.setBigDecimal(1, amount);
@@ -153,7 +143,6 @@ public class TransactionRepositoryImpl implements TransactionRepository {
         }
     }
 
-    @Log
     private static void insertTransactionRecord(BigDecimal amount, TransactionType transactionType, String senderIban, String recipientIban, LocalDate date, LocalTime time, Currency currency, Connection connection, String insertQuery) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement(insertQuery)) {
             statement.setBigDecimal(1, amount);
@@ -167,21 +156,18 @@ public class TransactionRepositoryImpl implements TransactionRepository {
         }
     }
 
-    @Log
     private static boolean updateAccountBalanceForRefill(BigDecimal amount, String iban, Connection connection) {
         String updateQuery = "UPDATE account SET balance = balance + ? WHERE iban = ?";
 
         return updateAccountBalance(amount, iban, connection, updateQuery);
     }
 
-    @Log
     private static boolean updateAccountBalanceForWithdrawals(BigDecimal amount, String iban, Connection connection) {
         String updateQuery = "UPDATE account SET balance = balance - ? WHERE iban = ?";
 
         return updateAccountBalance(amount, iban, connection, updateQuery);
     }
 
-    @Log
     private static boolean updateAccountBalance(BigDecimal amount, String iban, Connection connection, String updateQuery) {
         try (PreparedStatement statement = connection.prepareStatement(updateQuery)) {
             statement.setBigDecimal(1, amount);
