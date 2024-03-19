@@ -3,17 +3,15 @@ package ru.clevertec.task.aspects;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+
+import static java.time.format.DateTimeFormatter.ofPattern;
 
 @Aspect
 public class Logging {
@@ -33,15 +31,13 @@ public class Logging {
         String name = joinPoint.getSignature().getName();
         String shortSignature = joinPoint.getSignature().toShortString();
         String args = Arrays.toString(joinPoint.getArgs());
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        String dateTime = LocalDateTime.now().format(formatter);
+        String dateTime = ofPattern("yyyy-MM-dd HH:mm:ss").format(LocalDateTime.now());
 
         return String.format("%s, %s -> %s: %s -> %s\n", dateTime, name, shortSignature, args, results);
     }
 
     private static void appendLogToFile(String logMessage) {
-        Path path = Paths.get("../webapps/ROOT/WEB-INF/classes/logs/log.txt");
-        File file = new File(path.toUri());
+        File file = new File("C:/Users/lika_piv/IdeaProjects/Clever-Bank/src/main/resources/logs/log.txt");
         try (FileWriter writer = new FileWriter(file, true)) {
             writer.write(logMessage);
         } catch (IOException e) {
