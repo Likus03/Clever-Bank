@@ -24,7 +24,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Log
     @Override
-    public boolean refillTransaction(Transaction transaction) {
+    public boolean depositeTransaction(Transaction transaction) {
         try {
             transactionRepository.transaction(transaction);
         } catch (SQLException e) {

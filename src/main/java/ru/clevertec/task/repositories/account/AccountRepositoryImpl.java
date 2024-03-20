@@ -9,6 +9,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import static java.sql.Types.OTHER;
+import static ru.clevertec.task.db.DbConnection.*;
 
 public class AccountRepositoryImpl implements AccountRepository {
     private AccountRepositoryImpl() {
@@ -24,20 +25,21 @@ public class AccountRepositoryImpl implements AccountRepository {
 
     @Override
     public void createAccount(Account account) throws SQLException {
-        try (Connection connection = DbConnection.getConnection()) {
-            connection.setAutoCommit(false);
-            String query = "INSERT INTO account(iban, bank_id, user_id, currency, opening_date) VALUES (?,?,?,?,?)";
+        Connection connection = getConnection();
+        connection.setAutoCommit(false);
+        String query = "INSERT INTO account(iban, bank_id, user_id, currency, opening_date) VALUES (?,?,?,?,?)";
 
-            try (PreparedStatement statement = connection.prepareStatement(query)) {
-                statement.setString(1, account.getIban());
-                statement.setObject(2, account.getBankId());
-                statement.setObject(3, account.getUserId());
-                statement.setObject(4, account.getCurrency(), OTHER);
-                statement.setDate(5, Date.valueOf(account.getOpeningDate()));
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, account.getIban());
+            statement.setObject(2, account.getBankId());
+            statement.setObject(3, account.getUserId());
+            statement.setObject(4, account.getCurrency(), OTHER);
+            statement.setDate(5, Date.valueOf(account.getOpeningDate()));
 
-                statement.executeUpdate();
-            }
-            connection.commit();
+            statement.executeUpdate();
         }
+        connection.commit();
+        releaseConnection(connection);
     }
+
 }

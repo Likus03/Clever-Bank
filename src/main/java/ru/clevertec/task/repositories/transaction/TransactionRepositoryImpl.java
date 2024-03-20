@@ -1,6 +1,5 @@
 package ru.clevertec.task.repositories.transaction;
 
-import ru.clevertec.task.aspects.Log;
 import ru.clevertec.task.db.DbConnection;
 import ru.clevertec.task.entities.Transaction;
 import ru.clevertec.task.enums.Currency;
@@ -9,8 +8,9 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.*;
 
-import static java.sql.Connection.TRANSACTION_REPEATABLE_READ;
+import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
 import static java.sql.Types.OTHER;
+import static ru.clevertec.task.db.DbConnection.*;
 import static ru.clevertec.task.utils.Constants.getAmount;
 import static ru.clevertec.task.utils.Rates.getExchangeRates;
 
@@ -28,9 +28,10 @@ public class TransactionRepositoryImpl implements TransactionRepository {
 
     @Override
     public void transaction(Transaction transaction) throws SQLException {
-        try (Connection connection = DbConnection.getConnection()) {
+        Connection connection = getConnection();
+        try {
             connection.setAutoCommit(false);
-            connection.setTransactionIsolation(TRANSACTION_REPEATABLE_READ);
+//            connection.setTransactionIsolation(TRANSACTION_READ_COMMITTED);
 
             Currency accountCurrency = getCurrency(transaction.getIban(), connection);
             BigDecimal rate = getExchangeRates(transaction.getCurrency(), accountCurrency);
@@ -44,15 +45,17 @@ public class TransactionRepositoryImpl implements TransactionRepository {
             connection.commit();
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } finally {
+            releaseConnection(connection);
         }
     }
 
-    @Log
     @Override
     public void transferTransaction(Transaction transactionWithdrawals, Transaction transactionDeposit) throws SQLException {
-        try (Connection connection = DbConnection.getConnection()) {
+        Connection connection = getConnection();
+        try {
             connection.setAutoCommit(false);
-            connection.setTransactionIsolation(TRANSACTION_REPEATABLE_READ);
+            connection.setTransactionIsolation(TRANSACTION_READ_COMMITTED);
 
             Currency accountCurrency = getCurrency(transactionWithdrawals.getIban(), connection);
             BigDecimal rate = getExchangeRates(transactionWithdrawals.getCurrency(), accountCurrency);
@@ -69,6 +72,8 @@ public class TransactionRepositoryImpl implements TransactionRepository {
             connection.commit();
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } finally {
+            releaseConnection(connection);
         }
     }
 
@@ -124,7 +129,7 @@ public class TransactionRepositoryImpl implements TransactionRepository {
         }
     }
 
-    private static boolean updateAccountBalance(BigDecimal amount, String iban, Connection connection) {
+    synchronized private static boolean updateAccountBalance(BigDecimal amount, String iban, Connection connection) {
         String updateQuery = "UPDATE account SET balance = balance + ? WHERE iban = ?";
 
         try (PreparedStatement statement = connection.prepareStatement(updateQuery)) {

@@ -1,5 +1,6 @@
 package ru.clevertec.task.repositories.user;
 
+import lombok.SneakyThrows;
 import ru.clevertec.task.db.DbConnection;
 import ru.clevertec.task.entities.User;
 
@@ -10,6 +11,7 @@ import java.sql.SQLException;
 import java.util.UUID;
 
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
+import static ru.clevertec.task.db.DbConnection.*;
 
 public class UserRepositoryImpl implements UserRepository {
     private UserRepositoryImpl() {
@@ -25,7 +27,8 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public UUID createUser(User user) {
-        try (Connection connection = DbConnection.getConnection()) {
+        Connection connection = DbConnection.getConnection();
+        try {
             connection.setAutoCommit(false);
             String query = "INSERT INTO users(login, password, phonenumber, firstname, surname) VALUES (?,?,?,?,?)";
 
@@ -53,15 +56,17 @@ public class UserRepositoryImpl implements UserRepository {
 
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            releaseConnection(connection);
         }
         return null;
     }
 
+    @SneakyThrows
     @Override
     public UUID getUser(User user) {
-        try (Connection connection = DbConnection.getConnection()) {
-            connection.setReadOnly(true);
-
+        Connection connection = getConnection();
+        try {
             String query = "SELECT id FROM users WHERE login = ? and password = ?";
 
             try (PreparedStatement statement = connection.prepareStatement(query)) {
@@ -75,7 +80,9 @@ public class UserRepositoryImpl implements UserRepository {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
+        } finally {
+            releaseConnection(connection);
         }
         return null;
     }

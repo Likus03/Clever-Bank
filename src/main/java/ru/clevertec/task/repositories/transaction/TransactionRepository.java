@@ -5,9 +5,6 @@ import ru.clevertec.task.entities.Transaction;
 import java.sql.SQLException;
 
 public interface TransactionRepository {
-//    void refillTransaction(Transaction transaction) throws SQLException;
-
     void transaction(Transaction transaction) throws SQLException;
-
     void transferTransaction(Transaction transactionWithdrawals, Transaction transactionDeposit) throws SQLException;
 }

@@ -8,7 +8,7 @@
     <label>Create account: </label>
   <input type="submit" value="create">
 </form>
-<form action="/transaction/refill" method="get">
+<form action="/transaction/deposit" method="get">
     <label>Refill account: </label>
     <input type="submit" value="refill">
 </form>

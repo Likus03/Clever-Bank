@@ -15,7 +15,7 @@ public class Constants {
     public static final String ERROR_OCCURRED_PAGE = "/WEB-INF/views/errors/error-occurred.jsp";
     public static final String ACCOUNT_CREATE_PAGE = "/WEB-INF/views/account/createAccount.jsp";
     public static final String ACCOUNT_CREATE_URL = "/account/create";
-    public static final String ACCOUNT_REFILL_URL = "/transaction/refill";
+    public static final String ACCOUNT_DEPOSIT_URL = "/transaction/deposit";
     public static final String ACCOUNT_REFILL_PAGE = "/WEB-INF/views/transaction/refill.jsp";
     public static final String AUTHORIZATION_URL = "/user/authorization";
     public static final String START_PAGE = "/index.jsp";

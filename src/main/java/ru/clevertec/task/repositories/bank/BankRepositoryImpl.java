@@ -1,8 +1,8 @@
 package ru.clevertec.task.repositories.bank;
 
+import lombok.SneakyThrows;
 import ru.clevertec.task.db.DbConnection;
 import ru.clevertec.task.entities.Bank;
-import ru.clevertec.task.mappers.UserMapper;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,8 +11,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.CopyOnWriteArrayList;
 
+import static ru.clevertec.task.db.DbConnection.*;
 import static ru.clevertec.task.utils.Constants.ID;
 import static ru.clevertec.task.utils.Constants.NAME;
 
@@ -28,12 +28,12 @@ public class BankRepositoryImpl implements BankRepository {
         return Holder.INSTANCE;
     }
 
+    @SneakyThrows
     @Override
     public List<Bank> getBanks() {
+        Connection connection = getConnection();
         List<Bank> banks = new ArrayList<>();
-        try (Connection connection = DbConnection.getConnection()) {
-            connection.setReadOnly(true);
-
+        try {
             String query = "SELECT * FROM bank";
 
             try (PreparedStatement statement = connection.prepareStatement(query)) {
@@ -46,6 +46,10 @@ public class BankRepositoryImpl implements BankRepository {
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        }
+        finally {
+            connection.setReadOnly(false);
+            releaseConnection(connection);
         }
     }
 }

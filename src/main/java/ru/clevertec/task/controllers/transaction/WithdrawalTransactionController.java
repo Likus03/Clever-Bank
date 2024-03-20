@@ -33,7 +33,7 @@ public class WithdrawalTransactionController extends HttpServlet {
 
         req.getRequestDispatcher(ACCOUNT_WITHDRAWALS_PAGE).forward(req, resp);
     }
-
+//todo сделать потоки
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String iban = req.getParameter(IBAN);
