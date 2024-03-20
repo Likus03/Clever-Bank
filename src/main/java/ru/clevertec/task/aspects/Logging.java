@@ -37,7 +37,7 @@ public class Logging {
     }
 
     private static void appendLogToFile(String logMessage) {
-        File file = new File("C:/Users/lika_piv/IdeaProjects/Clever-Bank/src/main/resources/logs/log.txt");
+        File file = new File("C:/Users/lika_piv/IdeaProjects/Clever-Bank/src/main/out/logs/log.txt");
         try (FileWriter writer = new FileWriter(file, true)) {
             writer.write(logMessage);
         } catch (IOException e) {

@@ -1,20 +1,23 @@
 package ru.clevertec.task.repositories.user;
 
-import ru.clevertec.task.aspects.Log;
 import ru.clevertec.task.db.DbConnection;
 
 import java.sql.*;
 import java.util.UUID;
 
 public class UserRepositoryImpl implements UserRepository {
-    private static UserRepository userRepository;
+    private static volatile UserRepository userRepository;
 
     private UserRepositoryImpl() {
     }
 
     public static UserRepository getInstance() {
         if (userRepository == null) {
-            userRepository = new UserRepositoryImpl();
+            synchronized (UserRepositoryImpl.class) {
+                if (userRepository == null) {
+                    userRepository = new UserRepositoryImpl();
+                }
+            }
         }
         return userRepository;
     }
@@ -38,8 +41,7 @@ public class UserRepositoryImpl implements UserRepository {
                         UUID userId = (UUID) generatedKeys.getObject(1);
                         connection.commit();
                         return userId;
-                    }
-                    else {
+                    } else {
                         connection.rollback();
                         throw new SQLException("The transaction was rolled back");
                     }

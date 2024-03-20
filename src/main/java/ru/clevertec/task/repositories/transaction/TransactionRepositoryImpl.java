@@ -13,17 +13,22 @@ import java.time.LocalTime;
 import static java.math.RoundingMode.HALF_EVEN;
 import static java.sql.Connection.TRANSACTION_REPEATABLE_READ;
 import static java.sql.Types.OTHER;
+import static ru.clevertec.task.utils.Constants.getAmount;
 import static ru.clevertec.task.utils.Rates.getExchangeRates;
 
 public class TransactionRepositoryImpl implements TransactionRepository {
-    private static TransactionRepository transactionRepository;
+    private static volatile TransactionRepository transactionRepository;
 
     private TransactionRepositoryImpl() {
     }
 
     public static TransactionRepository getInstance() {
         if (transactionRepository == null) {
-            transactionRepository = new TransactionRepositoryImpl();
+            synchronized (TransactionRepositoryImpl.class) {
+                if (transactionRepository == null) {
+                    transactionRepository = new TransactionRepositoryImpl();
+                }
+            }
         }
         return transactionRepository;
     }
@@ -94,9 +99,7 @@ public class TransactionRepositoryImpl implements TransactionRepository {
         }
     }
 
-    private static BigDecimal getAmount(BigDecimal amount, BigDecimal rate) {
-        return amount.multiply(rate).setScale(2, HALF_EVEN);
-    }
+
 
     private Currency getCurrency(String iban, Connection connection) throws SQLException {
         String selectQuery = "SELECT currency FROM account WHERE iban=?";

@@ -1,9 +1,7 @@
 package ru.clevertec.task.repositories.bank;
 
-import org.aspectj.apache.bcel.classfile.Constant;
 import ru.clevertec.task.db.DbConnection;
 import ru.clevertec.task.entities.Bank;
-import ru.clevertec.task.utils.Constants;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,17 +11,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static ru.clevertec.task.utils.Constants.*;
+import static ru.clevertec.task.utils.Constants.ID;
+import static ru.clevertec.task.utils.Constants.NAME;
 
 public class BankRepositoryImpl implements BankRepository {
-    private static BankRepository bankRepository;
+    private static volatile BankRepository bankRepository;
 
     private BankRepositoryImpl() {
     }
 
     public static BankRepository getInstance() {
         if (bankRepository == null) {
-            bankRepository = new BankRepositoryImpl();
+            synchronized (BankRepositoryImpl.class) {
+                if (bankRepository == null) {
+                    bankRepository = new BankRepositoryImpl();
+                }
+            }
         }
         return bankRepository;
     }

@@ -14,7 +14,7 @@ import java.util.UUID;
 
 import static ru.clevertec.task.utils.Constants.*;
 
-@WebServlet(REGISTRATION_URL)
+@WebServlet(value = REGISTRATION_URL, asyncSupported = true)
 public class UserRegistrationController extends HttpServlet {
     private final UserService userService = UserServiceImpl.getInstance();
 

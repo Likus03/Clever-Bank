@@ -16,7 +16,7 @@ import java.util.List;
 import static ru.clevertec.task.enums.Currency.getCurrencyList;
 import static ru.clevertec.task.utils.Constants.*;
 
-@WebServlet(ACCOUNT_REFILL_URL)
+@WebServlet(value = ACCOUNT_REFILL_URL, asyncSupported = true)
 public class RefillTransactionController extends HttpServlet {
     private final TransactionService transactionService = TransactionServiceImpl.getInstance();
     @Override

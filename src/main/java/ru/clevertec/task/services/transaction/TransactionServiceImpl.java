@@ -13,7 +13,7 @@ import java.time.LocalTime;
 import static ru.clevertec.task.enums.TransactionType.*;
 
 public class TransactionServiceImpl implements TransactionService {
-    private static TransactionService transactionService;
+    private static volatile TransactionService transactionService;
     private final TransactionRepository transactionRepository = TransactionRepositoryImpl.getInstance();
 
     private TransactionServiceImpl() {
@@ -21,10 +21,15 @@ public class TransactionServiceImpl implements TransactionService {
 
     public static TransactionService getInstance() {
         if (transactionService == null) {
-            transactionService = new TransactionServiceImpl();
+            synchronized (TransactionServiceImpl.class) {
+                if (transactionService == null) {
+                    transactionService = new TransactionServiceImpl();
+                }
+            }
         }
         return transactionService;
     }
+
     @Log
     @Override
     public boolean refillTransaction(String iban, BigDecimal amount, Currency currency) {
@@ -36,6 +41,7 @@ public class TransactionServiceImpl implements TransactionService {
         }
         return true;
     }
+
     @Log
     @Override
     public boolean withdrawalsTransaction(String iban, BigDecimal amount, Currency currency) {
@@ -47,6 +53,7 @@ public class TransactionServiceImpl implements TransactionService {
         }
         return true;
     }
+
     @Log
     @Override
     public boolean transferTransaction(String senderIban, BigDecimal amount, Currency currency, String recipientIban) {

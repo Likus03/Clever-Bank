@@ -1,5 +1,9 @@
 package ru.clevertec.task.utils;
 
+import java.math.BigDecimal;
+
+import static java.math.RoundingMode.HALF_EVEN;
+
 public class Constants {
     public static final String CONFIG = "config.properties";
     public static final String DB_URL = "db.url";
@@ -44,4 +48,9 @@ public class Constants {
 
 
     public static final String API_KEY = "bdd1af0bd03086e428c68bfb";  //will change
+
+
+    public static BigDecimal getAmount(BigDecimal amount, BigDecimal rate) {
+        return amount.multiply(rate).setScale(2, HALF_EVEN);
+    }
 }

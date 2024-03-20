@@ -17,7 +17,7 @@ import java.util.List;
 import static ru.clevertec.task.enums.Currency.getCurrencyList;
 import static ru.clevertec.task.utils.Constants.*;
 
-@WebServlet(TRANSFER_URL)
+@WebServlet(value = TRANSFER_URL, asyncSupported = true)
 public class TransferTransactionalController extends HttpServlet {
     private final TransactionService transactionService = TransactionServiceImpl.getInstance();
     @Override
