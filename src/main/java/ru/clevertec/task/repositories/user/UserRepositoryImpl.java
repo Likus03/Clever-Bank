@@ -5,6 +5,8 @@ import ru.clevertec.task.db.DbConnection;
 import java.sql.*;
 import java.util.UUID;
 
+import static java.sql.Statement.*;
+
 public class UserRepositoryImpl implements UserRepository {
     private static volatile UserRepository userRepository;
 
@@ -28,7 +30,7 @@ public class UserRepositoryImpl implements UserRepository {
             connection.setAutoCommit(false);
             String query = "INSERT INTO users(login, password, phonenumber, firstname, surname) VALUES (?,?,?,?,?)";
 
-            try (PreparedStatement statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+            try (PreparedStatement statement = connection.prepareStatement(query, RETURN_GENERATED_KEYS)) {
                 statement.setString(1, login);
                 statement.setString(2, password);
                 statement.setString(3, phoneNumber);

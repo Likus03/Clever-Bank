@@ -38,7 +38,7 @@ public class CreateAccountController extends HttpServlet {
         AsyncContext asyncContext = req.startAsync();
         asyncContext.start(() -> {
             try {
-                processAccountCreationRequest(req, resp, userId, bankId, currency);
+                accountCreationRequest(req, resp, userId, bankId, currency);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -58,7 +58,7 @@ public class CreateAccountController extends HttpServlet {
         req.getRequestDispatcher(ACCOUNT_CREATE_PAGE).forward(req, resp);
     }
 
-    private void processAccountCreationRequest(HttpServletRequest req, HttpServletResponse resp, UUID userId, UUID bankId, Currency currency) throws ExecutionException, InterruptedException, TimeoutException {
+    private void accountCreationRequest(HttpServletRequest req, HttpServletResponse resp, UUID userId, UUID bankId, Currency currency) throws ExecutionException, InterruptedException, TimeoutException {
         Boolean isCompleted = supplyAsync(
                 () -> accountService.createAccount(bankId, userId, currency))
                 .get(30, SECONDS);
