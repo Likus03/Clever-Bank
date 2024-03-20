@@ -1,6 +1,9 @@
 package ru.clevertec.task.controllers.transaction;
 
+import ru.clevertec.task.entities.Transaction;
 import ru.clevertec.task.enums.Currency;
+import ru.clevertec.task.enums.TransactionType;
+import ru.clevertec.task.mappers.TransactionMapper;
 import ru.clevertec.task.services.transaction.TransactionService;
 import ru.clevertec.task.services.transaction.TransactionServiceImpl;
 
@@ -20,6 +23,7 @@ import static ru.clevertec.task.utils.Constants.*;
 @WebServlet(value = TRANSFER_URL, asyncSupported = true)
 public class TransferTransactionalController extends HttpServlet {
     private final TransactionService transactionService = TransactionServiceImpl.getInstance();
+    private final TransactionMapper transactionMapper = TransactionMapper.getInstance();
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         List<Currency> currencies = getCurrencyList();
@@ -31,11 +35,12 @@ public class TransferTransactionalController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String senderIban = req.getParameter(SENDER_IBAN);
-        Currency currency = Currency.valueOf(req.getParameter(CURRENCY));
-        BigDecimal amount = BigDecimal.valueOf(Double.parseDouble(req.getParameter(AMOUNT)));
         String recipientIban = req.getParameter(RECIPIENT_IBAN);
 
-        if (transactionService.transferTransaction(senderIban, amount, currency, recipientIban)) {
+        Transaction transactionWithdrawals = transactionMapper.buildTransaction(req, TransactionType.TRANSFER, senderIban);
+        Transaction transactionDeposit = transactionMapper.buildTransaction(req, TransactionType.TRANSFER, recipientIban);
+
+        if (transactionService.transferTransaction(transactionWithdrawals, transactionDeposit)) {
             req.getRequestDispatcher(MENU).forward(req, resp);
         }
         req.getRequestDispatcher(ERROR_OCCURRED_PAGE).forward(req, resp);

@@ -1,17 +1,13 @@
 package ru.clevertec.task.repositories.transaction;
 
-import ru.clevertec.task.enums.Currency;
-import ru.clevertec.task.enums.TransactionType;
+import ru.clevertec.task.entities.Transaction;
 
-import java.math.BigDecimal;
 import java.sql.SQLException;
-import java.time.LocalDate;
-import java.time.LocalTime;
 
 public interface TransactionRepository {
-    void refillTransaction(BigDecimal amount, TransactionType transactionType, String iban, LocalDate date, LocalTime time, Currency currency) throws SQLException;
+//    void refillTransaction(Transaction transaction) throws SQLException;
 
-    void withdrawalsTransaction(BigDecimal amount, TransactionType transactionType, String iban, LocalDate date, LocalTime time, Currency currency) throws SQLException;
+    void transaction(Transaction transaction) throws SQLException;
 
-    void transferTransaction(BigDecimal amount, TransactionType transactionType, String senderIban, String recipientIban, LocalDate date, LocalTime time, Currency currency) throws SQLException;
+    void transferTransaction(Transaction transactionWithdrawals, Transaction transactionDeposit) throws SQLException;
 }

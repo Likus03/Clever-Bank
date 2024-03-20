@@ -1,40 +1,32 @@
 package ru.clevertec.task.services.transaction;
 
 import ru.clevertec.task.aspects.Log;
-import ru.clevertec.task.enums.Currency;
+import ru.clevertec.task.entities.Transaction;
 import ru.clevertec.task.repositories.transaction.TransactionRepository;
 import ru.clevertec.task.repositories.transaction.TransactionRepositoryImpl;
 
-import java.math.BigDecimal;
 import java.sql.SQLException;
-import java.time.LocalDate;
-import java.time.LocalTime;
-
-import static ru.clevertec.task.enums.TransactionType.*;
+import java.util.UUID;
 
 public class TransactionServiceImpl implements TransactionService {
-    private static volatile TransactionService transactionService;
     private final TransactionRepository transactionRepository = TransactionRepositoryImpl.getInstance();
 
     private TransactionServiceImpl() {
     }
 
+    private static class Holder {
+        private static final TransactionService INSTANCE = new TransactionServiceImpl();
+    }
+
     public static TransactionService getInstance() {
-        if (transactionService == null) {
-            synchronized (TransactionServiceImpl.class) {
-                if (transactionService == null) {
-                    transactionService = new TransactionServiceImpl();
-                }
-            }
-        }
-        return transactionService;
+        return Holder.INSTANCE;
     }
 
     @Log
     @Override
-    public boolean refillTransaction(String iban, BigDecimal amount, Currency currency) {
+    public boolean refillTransaction(Transaction transaction) {
         try {
-            transactionRepository.refillTransaction(amount, REFILL, iban, LocalDate.now(), LocalTime.now(), currency);
+            transactionRepository.transaction(transaction);
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -44,9 +36,10 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Log
     @Override
-    public boolean withdrawalsTransaction(String iban, BigDecimal amount, Currency currency) {
+    public boolean withdrawalsTransaction(Transaction transaction) {
+        transaction.setAmount(transaction.getAmount().negate());
         try {
-            transactionRepository.withdrawalsTransaction(amount, WITHDRAWALS, iban, LocalDate.now(), LocalTime.now(), currency);
+            transactionRepository.transaction(transaction);
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -56,9 +49,15 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Log
     @Override
-    public boolean transferTransaction(String senderIban, BigDecimal amount, Currency currency, String recipientIban) {
+    public boolean transferTransaction(Transaction transactionWithdrawals, Transaction transactionDeposit) {
+        transactionWithdrawals.setAmount(transactionWithdrawals.getAmount().negate());
+
+        UUID transactionId = UUID.randomUUID();
+        transactionWithdrawals.setTransactionId(transactionId);
+        transactionDeposit.setTransactionId(transactionId);
+
         try {
-            transactionRepository.transferTransaction(amount, TRANSFER, senderIban, recipientIban, LocalDate.now(), LocalTime.now(), currency);
+            transactionRepository.transferTransaction(transactionWithdrawals, transactionDeposit);
         } catch (SQLException e) {
             e.printStackTrace();
             return false;

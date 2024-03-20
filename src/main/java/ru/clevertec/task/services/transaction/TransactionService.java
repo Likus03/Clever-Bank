@@ -1,13 +1,11 @@
 package ru.clevertec.task.services.transaction;
 
-import ru.clevertec.task.enums.Currency;
-
-import java.math.BigDecimal;
+import ru.clevertec.task.entities.Transaction;
 
 public interface TransactionService {
-    boolean refillTransaction(String iban, BigDecimal amount, Currency currency);
+    boolean refillTransaction(Transaction transaction);
 
-    boolean withdrawalsTransaction(String iban, BigDecimal amount, Currency currency);
+    boolean withdrawalsTransaction(Transaction transaction);
 
-    boolean transferTransaction(String senderIban, BigDecimal amount, Currency currency, String recipientIban);
+    boolean transferTransaction(Transaction transactionWithdrawals, Transaction transactionDeposit);
 }

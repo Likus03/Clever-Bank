@@ -2,6 +2,7 @@ package ru.clevertec.task.repositories.bank;
 
 import ru.clevertec.task.db.DbConnection;
 import ru.clevertec.task.entities.Bank;
+import ru.clevertec.task.mappers.UserMapper;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,25 +11,21 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static ru.clevertec.task.utils.Constants.ID;
 import static ru.clevertec.task.utils.Constants.NAME;
 
 public class BankRepositoryImpl implements BankRepository {
-    private static volatile BankRepository bankRepository;
-
     private BankRepositoryImpl() {
     }
 
+    private static class Holder {
+        private static final BankRepository INSTANCE = new BankRepositoryImpl();
+    }
+
     public static BankRepository getInstance() {
-        if (bankRepository == null) {
-            synchronized (BankRepositoryImpl.class) {
-                if (bankRepository == null) {
-                    bankRepository = new BankRepositoryImpl();
-                }
-            }
-        }
-        return bankRepository;
+        return Holder.INSTANCE;
     }
 
     @Override

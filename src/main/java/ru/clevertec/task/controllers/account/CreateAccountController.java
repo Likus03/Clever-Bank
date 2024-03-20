@@ -1,7 +1,9 @@
 package ru.clevertec.task.controllers.account;
 
+import ru.clevertec.task.entities.Account;
 import ru.clevertec.task.entities.Bank;
 import ru.clevertec.task.enums.Currency;
+import ru.clevertec.task.mappers.AccountMapper;
 import ru.clevertec.task.services.account.AccountService;
 import ru.clevertec.task.services.account.AccountServiceImpl;
 import ru.clevertec.task.services.bank.BankService;
@@ -15,7 +17,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -28,21 +29,19 @@ import static ru.clevertec.task.utils.Constants.*;
 public class CreateAccountController extends HttpServlet {
     private final BankService bankService = BankServiceImpl.getInstance();
     private final AccountService accountService = AccountServiceImpl.getInstance();
+    private final AccountMapper accountMapper = AccountMapper.getInstance();
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        UUID userId = (UUID) req.getSession().getAttribute(USER_ID);
-        UUID bankId = UUID.fromString(req.getParameter(BANK_ID));
-        Currency currency = Currency.valueOf(req.getParameter(CURRENCY));
+        Account account = accountMapper.buildAccount(req);
 
         AsyncContext asyncContext = req.startAsync();
         asyncContext.start(() -> {
             try {
-                accountCreationRequest(req, resp, userId, bankId, currency);
+                accountCreationRequest(req, resp, account);
             } catch (Exception e) {
                 e.printStackTrace();
-            }
-            finally {
+            } finally {
                 asyncContext.complete();
             }
         });
@@ -58,27 +57,19 @@ public class CreateAccountController extends HttpServlet {
         req.getRequestDispatcher(ACCOUNT_CREATE_PAGE).forward(req, resp);
     }
 
-    private void accountCreationRequest(HttpServletRequest req, HttpServletResponse resp, UUID userId, UUID bankId, Currency currency) throws ExecutionException, InterruptedException, TimeoutException {
+    private void accountCreationRequest(HttpServletRequest req, HttpServletResponse resp, Account account) throws ExecutionException, InterruptedException, TimeoutException, ServletException, IOException {
         Boolean isCompleted = supplyAsync(
-                () -> accountService.createAccount(bankId, userId, currency))
+                () -> accountService.createAccount(account))
                 .get(30, SECONDS);
 
         handleAccountCreationResult(req, resp, isCompleted);
     }
 
-    private static void handleAccountCreationResult(HttpServletRequest req, HttpServletResponse resp, Boolean isCompleted) {
+    private static void handleAccountCreationResult(HttpServletRequest req, HttpServletResponse resp, Boolean isCompleted) throws ServletException, IOException {
         if (isCompleted) {
-            try {
-                req.getRequestDispatcher(MENU).forward(req, resp);
-            } catch (ServletException | IOException e) {
-                e.printStackTrace();
-            }
+            req.getRequestDispatcher(MENU).forward(req, resp);
         } else {
-            try {
-                req.getRequestDispatcher(ERROR_OCCURRED_PAGE).forward(req, resp);
-            } catch (ServletException | IOException e) {
-                e.printStackTrace();
-            }
+            req.getRequestDispatcher(ERROR_OCCURRED_PAGE).forward(req, resp);
         }
     }
 }

@@ -1,6 +1,7 @@
 package ru.clevertec.task.entities;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import ru.clevertec.task.enums.Currency;
 
@@ -10,6 +11,7 @@ import java.util.UUID;
 
 @AllArgsConstructor
 @Data
+@Builder
 public class Account {
     private UUID id;
     private String iban;

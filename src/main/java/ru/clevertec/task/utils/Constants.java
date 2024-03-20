@@ -35,6 +35,8 @@ public class Constants {
     public static final String CURRENCIES = "currencies";
     public static final String BANKS = "banks";
     public static final String IBAN = "iban";
+    public static final String BALANCE = "balance";
+    public static final String OPENING_DATE = "openingDate";
     public static final String SENDER_IBAN = "senderIban";
     public static final String RECIPIENT_IBAN = "recipientIban";
     public static final String AMOUNT = "amount";

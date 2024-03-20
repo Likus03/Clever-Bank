@@ -1,5 +1,7 @@
 package ru.clevertec.task.controllers.user;
 
+import ru.clevertec.task.entities.User;
+import ru.clevertec.task.mappers.UserMapper;
 import ru.clevertec.task.services.user.UserService;
 import ru.clevertec.task.services.user.UserServiceImpl;
 
@@ -21,6 +23,7 @@ import static ru.clevertec.task.utils.Constants.*;
 @WebServlet(value = REGISTRATION_URL, asyncSupported = true)
 public class UserRegistrationController extends HttpServlet {
     private final UserService userService = UserServiceImpl.getInstance();
+    private final UserMapper mapper = UserMapper.getInstance();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -29,16 +32,12 @@ public class UserRegistrationController extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String login = req.getParameter(LOGIN);
-        String password = req.getParameter(PASSWORD);
-        String phoneNumber = req.getParameter(PHONENUMBER);
-        String firstname = req.getParameter(FIRSTNAME);
-        String surname = req.getParameter(SURNAME);
+        User user = mapper.buildUser(req);
 
         AsyncContext asyncContext = req.startAsync();
         asyncContext.start(() -> {
             try {
-                registrationUser(req, resp, login, password, phoneNumber, firstname, surname);
+                createUser(req, resp, user);
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
@@ -47,11 +46,15 @@ public class UserRegistrationController extends HttpServlet {
         });
     }
 
-    private void registrationUser(HttpServletRequest req, HttpServletResponse resp, String login, String password, String phoneNumber, String firstname, String surname) throws InterruptedException, ExecutionException, TimeoutException, ServletException, IOException {
+    private void createUser(HttpServletRequest req, HttpServletResponse resp, User user) throws InterruptedException, ExecutionException, TimeoutException, ServletException, IOException {
         UUID userId = supplyAsync(
-                () -> userService.createUser(login, password, phoneNumber, firstname, surname))
+                () -> userService.createUser(user))
                 .get(30, SECONDS);
 
+        userCreationProcession(req, resp, userId);
+    }
+
+    private static void userCreationProcession(HttpServletRequest req, HttpServletResponse resp, UUID userId) throws ServletException, IOException {
         if (userId != null) {
             req.getSession(true).setAttribute(USER_ID, userId);
             req.getRequestDispatcher(ACCOUNT_CREATE_PAGE).forward(req, resp);

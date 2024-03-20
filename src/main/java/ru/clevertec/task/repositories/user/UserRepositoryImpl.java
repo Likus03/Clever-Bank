@@ -1,41 +1,40 @@
 package ru.clevertec.task.repositories.user;
 
 import ru.clevertec.task.db.DbConnection;
+import ru.clevertec.task.entities.User;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.UUID;
 
-import static java.sql.Statement.*;
+import static java.sql.Statement.RETURN_GENERATED_KEYS;
 
 public class UserRepositoryImpl implements UserRepository {
-    private static volatile UserRepository userRepository;
-
     private UserRepositoryImpl() {
     }
 
+    private static class Holder {
+        private static final UserRepository INSTANCE = new UserRepositoryImpl();
+    }
+
     public static UserRepository getInstance() {
-        if (userRepository == null) {
-            synchronized (UserRepositoryImpl.class) {
-                if (userRepository == null) {
-                    userRepository = new UserRepositoryImpl();
-                }
-            }
-        }
-        return userRepository;
+        return Holder.INSTANCE;
     }
 
     @Override
-    public UUID createUser(String login, String password, String phoneNumber, String firstname, String surname) {
+    public UUID createUser(User user) {
         try (Connection connection = DbConnection.getConnection()) {
             connection.setAutoCommit(false);
             String query = "INSERT INTO users(login, password, phonenumber, firstname, surname) VALUES (?,?,?,?,?)";
 
             try (PreparedStatement statement = connection.prepareStatement(query, RETURN_GENERATED_KEYS)) {
-                statement.setString(1, login);
-                statement.setString(2, password);
-                statement.setString(3, phoneNumber);
-                statement.setString(4, firstname);
-                statement.setString(5, surname);
+                statement.setString(1, user.getLogin());
+                statement.setString(2, user.getPassword());
+                statement.setString(3, user.getPhoneNumber());
+                statement.setString(4, user.getFirstname());
+                statement.setString(5, user.getSurname());
                 statement.executeUpdate();
 
                 try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
@@ -59,15 +58,15 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public UUID getUser(String login, String password) {
+    public UUID getUser(User user) {
         try (Connection connection = DbConnection.getConnection()) {
             connection.setReadOnly(true);
 
             String query = "SELECT id FROM users WHERE login = ? and password = ?";
 
             try (PreparedStatement statement = connection.prepareStatement(query)) {
-                statement.setString(1, login);
-                statement.setString(2, password);
+                statement.setString(1, user.getLogin());
+                statement.setString(2, user.getPassword());
 
                 try (ResultSet resultSet = statement.executeQuery()) {
                     if (resultSet.next()) {

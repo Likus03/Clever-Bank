@@ -1,49 +1,42 @@
 package ru.clevertec.task.repositories.transaction;
 
+import ru.clevertec.task.aspects.Log;
 import ru.clevertec.task.db.DbConnection;
+import ru.clevertec.task.entities.Transaction;
 import ru.clevertec.task.enums.Currency;
-import ru.clevertec.task.enums.TransactionType;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.*;
-import java.time.LocalDate;
-import java.time.LocalTime;
 
-import static java.math.RoundingMode.HALF_EVEN;
 import static java.sql.Connection.TRANSACTION_REPEATABLE_READ;
 import static java.sql.Types.OTHER;
 import static ru.clevertec.task.utils.Constants.getAmount;
 import static ru.clevertec.task.utils.Rates.getExchangeRates;
 
 public class TransactionRepositoryImpl implements TransactionRepository {
-    private static volatile TransactionRepository transactionRepository;
-
     private TransactionRepositoryImpl() {
     }
 
+    private static class Holder {
+        private static final TransactionRepository INSTANCE = new TransactionRepositoryImpl();
+    }
+
     public static TransactionRepository getInstance() {
-        if (transactionRepository == null) {
-            synchronized (TransactionRepositoryImpl.class) {
-                if (transactionRepository == null) {
-                    transactionRepository = new TransactionRepositoryImpl();
-                }
-            }
-        }
-        return transactionRepository;
+        return Holder.INSTANCE;
     }
 
     @Override
-    public void refillTransaction(BigDecimal amount, TransactionType transactionType, String iban, LocalDate date, LocalTime time, Currency currency) throws SQLException {
+    public void transaction(Transaction transaction) throws SQLException {
         try (Connection connection = DbConnection.getConnection()) {
             connection.setAutoCommit(false);
             connection.setTransactionIsolation(TRANSACTION_REPEATABLE_READ);
 
-            Currency accountCurrency = getCurrency(iban, connection);
-            BigDecimal rate = getExchangeRates(currency, accountCurrency);
+            Currency accountCurrency = getCurrency(transaction.getIban(), connection);
+            BigDecimal rate = getExchangeRates(transaction.getCurrency(), accountCurrency);
 
-            if (updateAccountBalanceForRefill(getAmount(amount, rate), iban, connection)) {
-                insertRefillTransactionQuery(amount, transactionType, iban, date, time, currency, connection);
+            if (updateAccountBalance(getAmount(transaction.getAmount(), rate), transaction.getIban(), connection)) {
+                insertTransactionQuery(transaction, connection);
             } else {
                 connection.rollback();
                 throw new SQLException("The transaction was rolled back");
@@ -54,17 +47,21 @@ public class TransactionRepositoryImpl implements TransactionRepository {
         }
     }
 
+    @Log
     @Override
-    public void withdrawalsTransaction(BigDecimal amount, TransactionType transactionType, String iban, LocalDate date, LocalTime time, Currency currency) throws SQLException {
+    public void transferTransaction(Transaction transactionWithdrawals, Transaction transactionDeposit) throws SQLException {
         try (Connection connection = DbConnection.getConnection()) {
             connection.setAutoCommit(false);
             connection.setTransactionIsolation(TRANSACTION_REPEATABLE_READ);
 
-            Currency accountCurrency = getCurrency(iban, connection);
-            BigDecimal rate = getExchangeRates(currency, accountCurrency);
+            Currency accountCurrency = getCurrency(transactionWithdrawals.getIban(), connection);
+            BigDecimal rate = getExchangeRates(transactionWithdrawals.getCurrency(), accountCurrency);
 
-            if (updateAccountBalanceForWithdrawals(getAmount(amount, rate), iban, connection)) {
-                insertWithdrawalsTransactionQuery(amount, transactionType, iban, date, time, currency, connection);
+            final BigDecimal transferAmount = getAmount(transactionDeposit.getAmount(), rate);
+
+            if (updateAccountBalance(transferAmount.negate(), transactionWithdrawals.getIban(), connection) &&
+                    updateAccountBalance(transferAmount, transactionDeposit.getIban(), connection)) {
+                insertTransferTransactionQuery(transactionWithdrawals, transactionDeposit, connection);
             } else {
                 connection.rollback();
                 throw new SQLException("The transaction was rolled back");
@@ -74,32 +71,6 @@ public class TransactionRepositoryImpl implements TransactionRepository {
             throw new RuntimeException(e);
         }
     }
-
-    @Override
-    public void transferTransaction(BigDecimal amount, TransactionType transactionType, String senderIban, String recipientIban, LocalDate date, LocalTime time, Currency currency) throws SQLException {
-        try (Connection connection = DbConnection.getConnection()) {
-            connection.setAutoCommit(false);
-            connection.setTransactionIsolation(TRANSACTION_REPEATABLE_READ);
-
-            Currency accountCurrency = getCurrency(senderIban, connection);
-            BigDecimal rate = getExchangeRates(currency, accountCurrency);
-
-            final BigDecimal transferAmount = getAmount(amount, rate);
-
-            if (updateAccountBalanceForWithdrawals(transferAmount, senderIban, connection) &&
-                    updateAccountBalanceForRefill(transferAmount, recipientIban, connection)) {
-                insertTransferTransactionQuery(amount, transactionType, senderIban, recipientIban, date, time, currency, connection);
-            } else {
-                connection.rollback();
-                throw new SQLException("The transaction was rolled back");
-            }
-            connection.commit();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-
 
     private Currency getCurrency(String iban, Connection connection) throws SQLException {
         String selectQuery = "SELECT currency FROM account WHERE iban=?";
@@ -116,62 +87,46 @@ public class TransactionRepositoryImpl implements TransactionRepository {
         return null;
     }
 
-    private static void insertRefillTransactionQuery(BigDecimal amount, TransactionType transactionType, String iban, LocalDate date, LocalTime time, Currency currency, Connection connection) throws SQLException {
-        String insertQuery = "INSERT INTO transaction(amount, transaction_type, recipient_account_iban, date, time, currency) VALUES (?,?,?,?,?,?)";
+    private static void insertTransactionQuery(Transaction transaction, Connection connection) throws SQLException {
+        String insertQuery = "INSERT INTO transaction(transaction_type, iban, amount, date, time, currency) VALUES (?,?,?,?,?,?)";
 
-        insertTransactionRecord(amount, transactionType, iban, date, time, currency, connection, insertQuery);
-    }
-
-    private static void insertWithdrawalsTransactionQuery(BigDecimal amount, TransactionType transactionType, String iban, LocalDate date, LocalTime time, Currency currency, Connection connection) throws SQLException {
-        String insertQuery = "INSERT INTO transaction(amount, transaction_type, sender_account_iban, date, time, currency) VALUES (?,?,?,?,?,?)";
-
-        insertTransactionRecord(amount, transactionType, iban, date, time, currency, connection, insertQuery);
-    }
-
-    private static void insertTransferTransactionQuery(BigDecimal amount, TransactionType transactionType, String senderIban, String recipientIban, LocalDate date, LocalTime time, Currency currency, Connection connection) throws SQLException {
-        String insertQuery = "INSERT INTO transaction(amount, transaction_type, sender_account_iban, recipient_account_iban, date, time, currency) VALUES (?,?,?,?,?,?,?)";
-
-        insertTransactionRecord(amount, transactionType, senderIban, recipientIban, date, time, currency, connection, insertQuery);
-    }
-
-    private static void insertTransactionRecord(BigDecimal amount, TransactionType transactionType, String iban, LocalDate date, LocalTime time, Currency currency, Connection connection, String insertQuery) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement(insertQuery)) {
-            statement.setBigDecimal(1, amount);
-            statement.setObject(2, transactionType, OTHER);
-            statement.setString(3, iban);
-            statement.setDate(4, Date.valueOf(date));
-            statement.setTime(5, Time.valueOf(time));
-            statement.setObject(6, currency, OTHER);
+            statement.setObject(1, transaction.getTransactionType(), OTHER);
+            statement.setString(2, transaction.getIban());
+            statement.setBigDecimal(3, transaction.getAmount());
+            statement.setDate(4, Date.valueOf(transaction.getDate()));
+            statement.setTime(5, Time.valueOf(transaction.getTime()));
+            statement.setObject(6, transaction.getCurrency(), OTHER);
             statement.executeUpdate();
         }
     }
 
-    private static void insertTransactionRecord(BigDecimal amount, TransactionType transactionType, String senderIban, String recipientIban, LocalDate date, LocalTime time, Currency currency, Connection connection, String insertQuery) throws SQLException {
+    private static void insertTransferTransactionQuery(Transaction transactionWithdrawals, Transaction transactionDeposit, Connection connection) throws SQLException {
+        String insertQuery = "INSERT INTO transaction (transaction_id, transaction_type, iban, amount, date, time, currency) " +
+                "VALUES (?,?,?,?,?,?,?), (?,?,?,?,?,?,?)";
         try (PreparedStatement statement = connection.prepareStatement(insertQuery)) {
-            statement.setBigDecimal(1, amount);
-            statement.setObject(2, transactionType, OTHER);
-            statement.setString(3, senderIban);
-            statement.setString(4, recipientIban);
-            statement.setDate(5, Date.valueOf(date));
-            statement.setTime(6, Time.valueOf(time));
-            statement.setObject(7, currency, OTHER);
+            statement.setObject(1, transactionWithdrawals.getTransactionId());
+            statement.setObject(2, transactionWithdrawals.getTransactionType(), OTHER);
+            statement.setString(3, transactionWithdrawals.getIban());
+            statement.setBigDecimal(4, transactionWithdrawals.getAmount());
+            statement.setDate(5, Date.valueOf(transactionWithdrawals.getDate()));
+            statement.setTime(6, Time.valueOf(transactionWithdrawals.getTime()));
+            statement.setObject(7, transactionWithdrawals.getCurrency(), OTHER);
+
+            statement.setObject(8, transactionDeposit.getTransactionId());
+            statement.setObject(9, transactionDeposit.getTransactionType(), OTHER);
+            statement.setString(10, transactionDeposit.getIban());
+            statement.setBigDecimal(11, transactionDeposit.getAmount());
+            statement.setDate(12, Date.valueOf(transactionDeposit.getDate()));
+            statement.setTime(13, Time.valueOf(transactionDeposit.getTime()));
+            statement.setObject(14, transactionDeposit.getCurrency(), OTHER);
             statement.executeUpdate();
         }
     }
 
-    private static boolean updateAccountBalanceForRefill(BigDecimal amount, String iban, Connection connection) {
+    private static boolean updateAccountBalance(BigDecimal amount, String iban, Connection connection) {
         String updateQuery = "UPDATE account SET balance = balance + ? WHERE iban = ?";
 
-        return updateAccountBalance(amount, iban, connection, updateQuery);
-    }
-
-    private static boolean updateAccountBalanceForWithdrawals(BigDecimal amount, String iban, Connection connection) {
-        String updateQuery = "UPDATE account SET balance = balance - ? WHERE iban = ?";
-
-        return updateAccountBalance(amount, iban, connection, updateQuery);
-    }
-
-    private static boolean updateAccountBalance(BigDecimal amount, String iban, Connection connection, String updateQuery) {
         try (PreparedStatement statement = connection.prepareStatement(updateQuery)) {
             statement.setBigDecimal(1, amount);
             statement.setString(2, iban);
